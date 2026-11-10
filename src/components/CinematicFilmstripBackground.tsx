@@ -1,5 +1,4 @@
 import React from 'react';
-import React from 'react';
 
 // Couple's own photos (stored in /public/photos, 4:3 crops, served as static files)
 const WEDDING_PHOTOS = [
