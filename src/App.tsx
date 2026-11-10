@@ -34,7 +34,13 @@ export default function App() {
           parsed.monogram = 'Ж & Ш';
           parsed.time = '19:00';
         }
-        return parsed;
+        return {
+          ...INITIAL_WEDDING_DATA,
+          ...parsed,
+          heroImage: parsed.heroImage?.startsWith('/src/assets/') ? INITIAL_WEDDING_DATA.heroImage : parsed.heroImage || INITIAL_WEDDING_DATA.heroImage,
+          ringsImage: parsed.ringsImage?.startsWith('/src/assets/') ? INITIAL_WEDDING_DATA.ringsImage : parsed.ringsImage || INITIAL_WEDDING_DATA.ringsImage,
+          venueImage: parsed.venueImage?.startsWith('/src/assets/') ? INITIAL_WEDDING_DATA.venueImage : parsed.venueImage || INITIAL_WEDDING_DATA.venueImage,
+        };
       }
     } catch {
       // ignore
