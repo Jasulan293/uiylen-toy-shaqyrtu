@@ -16,17 +16,26 @@ export const FloatingAudio: React.FC = () => {
       }
     };
 
-    const stopMusic = () => audio.pause();
+    const stopMusic = () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+
     startMusic();
     // If autoplay is blocked, start after the visitor's first interaction.
     document.addEventListener('pointerdown', startMusic, { once: true });
     document.addEventListener('keydown', startMusic, { once: true });
+
+    // Stop playback when the page is closed, refreshed, or navigated away from.
     window.addEventListener('pagehide', stopMusic);
+    window.addEventListener('beforeunload', stopMusic);
+
     return () => {
       document.removeEventListener('pointerdown', startMusic);
       document.removeEventListener('keydown', startMusic);
       window.removeEventListener('pagehide', stopMusic);
-      audio.pause();
+      window.removeEventListener('beforeunload', stopMusic);
+      stopMusic();
     };
   }, []);
 
