@@ -51,27 +51,15 @@ export default function App() {
   const [rsvpList, setRsvpList] = useState<RSVPRecord[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_RSVP);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const records = JSON.parse(saved) as RSVPRecord[];
+        // Remove starter/demo entries; keep only real guest submissions.
+        return records.filter((record) => !record.id.startsWith('sample-'));
+      }
     } catch {
       // ignore
     }
-    return [
-      {
-        id: 'sample-1',
-        guestName: 'Нұрлан & Әсем',
-        status: 'with_partner',
-        partnerName: 'Әсем',
-        guestCount: 2,
-        createdAt: '1 сағат бұрын',
-      },
-      {
-        id: 'sample-2',
-        guestName: 'Дәулет Маратұлы',
-        status: 'attending',
-        guestCount: 1,
-        createdAt: '2 сағат бұрын',
-      },
-    ];
+    return [];
   });
 
   const [wishes, setWishes] = useState<GuestWish[]>(() => {
