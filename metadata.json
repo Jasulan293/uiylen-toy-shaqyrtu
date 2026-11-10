@@ -1,0 +1,6 @@
+{
+  "name": "Үйлену тойына шақырту — Apple Clean",
+  "description": "Apple Clean минималистік стиліндегі скролл-анимациялы интерактивті үйлену той шақырту сайты",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
