@@ -17,9 +17,9 @@ export const INITIAL_WEDDING_DATA: WeddingData = {
   heroSubtitle: 'Біздің махаббат хикаямыздың ең маңызды сәтін бірге қарсы алып, қуанышымызды бөлісуге шақырамыз.',
   invitationText: 'Құрметті ағайын-туыс, бауырлар, құда-жекжат және ардақты достар! Сіздерді ұлымыз бен қызымыздың отау құру салтанатына арналған үйлену тойына шын жүректен қадірлі қонақ болуға шақырамыз.',
   parentsText: 'Той иелері: ата-аналары',
-  heroImage: '/src/assets/images/hero_wedding_couple_1794311551143.jpg',
-  ringsImage: '/src/assets/images/rings_wedding_editorial_1794311551343.jpg',
-  venueImage: '/src/assets/images/venue_reception_dinner_1794311551835.jpg',
+  heroImage: '/images/couple-hands.jpg',
+  ringsImage: '/images/calendar-rings.jpg',
+  venueImage: '/images/venue-baysal.jpg',
   dressCodeDescription: 'Біздің мерекеміздің үйлесімді әрі есте қаларлықтай өтуі үшін келесі түстер палитрасындағы салтанатты киім үлгісін таңдауыңызды өтінеміз:',
   dressCodeColors: [
     { name: 'Ақшыл сүт', hex: '#F5F5F7' },
