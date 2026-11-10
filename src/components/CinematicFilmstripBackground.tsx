@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, useScroll, useTransform, useSpring } from 'motion/react';
 
 // Couple's own photos (stored in /public/photos, 4:3 crops, served as static files)
 const WEDDING_PHOTOS = [
@@ -24,12 +25,16 @@ const getColumnPhotos = (offset: number) => {
 
 interface ColumnStripProps {
   photos: string[];
+  translateY: unknown;
   columnId: number;
 }
 
-const ColumnStrip: React.FC<ColumnStripProps> = ({ photos, columnId }) => {
+const ColumnStrip: React.FC<ColumnStripProps> = ({ photos, translateY, columnId }) => {
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 shrink-0 w-44 sm:w-56 md:w-64">
+    <motion.div
+      style={{ y: translateY as any }}
+      className="flex flex-col gap-4 sm:gap-6 shrink-0 w-44 sm:w-56 md:w-64"
+    >
       {photos.map((url, idx) => (
         <div
           key={`col-${columnId}-item-${idx}`}
@@ -75,27 +80,78 @@ const ColumnStrip: React.FC<ColumnStripProps> = ({ photos, columnId }) => {
           </div>
         </div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
 export const CinematicFilmstripBackground: React.FC = () => {
-  // Keep the decorative filmstrip static: scroll-linked blur/transform animations
-  // caused repaint flicker and unnecessary work on laptop GPUs.
+  const { scrollYProgress } = useScroll();
+
+  // Smooth physical spring to eliminate scroll jank
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 28,
+    restDelta: 0.001,
+  });
+
+  // Opposing parallax motion for columns (michelleandtonye.com style)
+  // Col 0: Upward
+  const col0Y = useTransform(smoothProgress, [0, 1], ['0%', '-36%']);
+  // Col 1: Downward (Opposite)
+  const col1Y = useTransform(smoothProgress, [0, 1], ['-36%', '0%']);
+  // Col 2: Upward
+  const col2Y = useTransform(smoothProgress, [0, 1], ['-5%', '-40%']);
+  // Col 3: Downward (Opposite)
+  const col3Y = useTransform(smoothProgress, [0, 1], ['-32%', '4%']);
+  // Col 4: Upward
+  const col4Y = useTransform(smoothProgress, [0, 1], ['-2%', '-35%']);
+
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none opacity-55 sm:opacity-60"
-      style={{ transform: 'translate3d(0,0,0)', backfaceVisibility: 'hidden' }}
+      className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none opacity-60 sm:opacity-70 md:opacity-75 transition-opacity duration-500"
     >
-      <div className="absolute -inset-x-32 -inset-y-48 flex justify-center items-start gap-4 sm:gap-6 md:gap-8 -rotate-[13deg] origin-center">
-        <ColumnStrip columnId={0} photos={getColumnPhotos(0)} />
-        <ColumnStrip columnId={1} photos={getColumnPhotos(2)} />
-        <ColumnStrip columnId={2} photos={getColumnPhotos(4)} />
-        <div className="hidden xl:block">
-          <ColumnStrip columnId={3} photos={getColumnPhotos(1)} />
+      {/* Tilted Multi-column Film Grid (matching user screenshot) */}
+      <div className="absolute -inset-x-32 -inset-y-48 flex justify-center items-start gap-4 sm:gap-6 md:gap-8 transform -rotate-[13deg] origin-center">
+        {/* Column 0: UP */}
+        <ColumnStrip
+          columnId={0}
+          photos={getColumnPhotos(0)}
+          translateY={col0Y}
+        />
+
+        {/* Column 1: DOWN (Opposite) */}
+        <ColumnStrip
+          columnId={1}
+          photos={getColumnPhotos(2)}
+          translateY={col1Y}
+        />
+
+        {/* Column 2: UP */}
+        <ColumnStrip
+          columnId={2}
+          photos={getColumnPhotos(4)}
+          translateY={col2Y}
+        />
+
+        {/* Column 3: DOWN (Opposite) */}
+        <ColumnStrip
+          columnId={3}
+          photos={getColumnPhotos(1)}
+          translateY={col3Y}
+        />
+
+        {/* Column 4: UP */}
+        <div className="hidden lg:block">
+          <ColumnStrip
+            columnId={4}
+            photos={getColumnPhotos(3)}
+            translateY={col4Y}
+          />
         </div>
       </div>
+
+      {/* Light atmospheric vignette that keeps text crisp while letting filmstrip pop */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#FBFBFD]/40 via-transparent to-[#FBFBFD]/50 pointer-events-none" />
     </div>
   );
