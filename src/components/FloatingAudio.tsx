@@ -16,14 +16,17 @@ export const FloatingAudio: React.FC = () => {
       }
     };
 
+    const stopMusic = () => audio.pause();
     startMusic();
-    // If autoplay is blocked, start silently in the background on the visitor's
-    // first tap/click/key press anywhere on the page (no music button needed).
+    // If autoplay is blocked, start after the visitor's first interaction.
     document.addEventListener('pointerdown', startMusic, { once: true });
     document.addEventListener('keydown', startMusic, { once: true });
+    window.addEventListener('pagehide', stopMusic);
     return () => {
       document.removeEventListener('pointerdown', startMusic);
       document.removeEventListener('keydown', startMusic);
+      window.removeEventListener('pagehide', stopMusic);
+      audio.pause();
     };
   }, []);
 
