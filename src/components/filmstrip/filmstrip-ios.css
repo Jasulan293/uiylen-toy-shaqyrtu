@@ -1,0 +1,22 @@
+/* iPhone / iPad (Safari 26+): scroll-driven parallax in CSS.
+   Safari runs it on the compositor, in sync with the native scrolling, so there is no
+   one-frame lag between the page and the background (that lag was the small jitter
+   of the JS version, strongest when scrolling up).
+   Percentages are relative to each column's own height.
+   Columns 0, 2, 4 go up; columns 1, 3 go down. */
+@keyframes film-ios-col-0 { from { transform: translate3d(0, 0%, 0); }   to { transform: translate3d(0, -36%, 0); } }
+@keyframes film-ios-col-1 { from { transform: translate3d(0, -36%, 0); } to { transform: translate3d(0, 0%, 0); } }
+@keyframes film-ios-col-2 { from { transform: translate3d(0, -5%, 0); }  to { transform: translate3d(0, -40%, 0); } }
+@keyframes film-ios-col-3 { from { transform: translate3d(0, -32%, 0); } to { transform: translate3d(0, 4%, 0); } }
+@keyframes film-ios-col-4 { from { transform: translate3d(0, -2%, 0); }  to { transform: translate3d(0, -35%, 0); } }
+
+.film-ios-css .film-ios-col {
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  animation-timeline: scroll(root block);
+}
+.film-ios-css .film-ios-col-0 { animation-name: film-ios-col-0; }
+.film-ios-css .film-ios-col-1 { animation-name: film-ios-col-1; }
+.film-ios-css .film-ios-col-2 { animation-name: film-ios-col-2; }
+.film-ios-css .film-ios-col-3 { animation-name: film-ios-col-3; }
+.film-ios-css .film-ios-col-4 { animation-name: film-ios-col-4; }
