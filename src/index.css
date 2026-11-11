@@ -3,6 +3,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
@@ -33,17 +34,51 @@
   background: #86868B;
 }
 
+/* Frosted glass only on devices with a real mouse (desktop).
+   On phones/tablets backdrop-filter over the moving filmstrip background is
+   re-computed every frame and causes flicker/jitter, so we use a solid translucent fill. */
 .glass-card {
-  background-color: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  backdrop-filter: blur(18px) saturate(160%);
+  background-color: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.05);
 }
 
 .glass-matte-btn {
-  background-color: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background-color: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .glass-card {
+    background-color: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+  }
+  .glass-matte-btn {
+    background-color: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+}
+
+/* Scroll-driven parallax for the film columns (Chrome / Android / Edge / Firefox when supported).
+   Runs on the compositor thread = smooth even on weak phones. Percentages are relative to the
+   column's own height. Columns 0,2,4 go up, columns 1,3 go down. */
+@keyframes film-col-0 { from { transform: translate3d(0, 0%, 0); }     to { transform: translate3d(0, -36%, 0); } }
+@keyframes film-col-1 { from { transform: translate3d(0, -36%, 0); }   to { transform: translate3d(0, 0%, 0); } }
+@keyframes film-col-2 { from { transform: translate3d(0, -5%, 0); }    to { transform: translate3d(0, -40%, 0); } }
+@keyframes film-col-3 { from { transform: translate3d(0, -32%, 0); }   to { transform: translate3d(0, 4%, 0); } }
+@keyframes film-col-4 { from { transform: translate3d(0, -2%, 0); }    to { transform: translate3d(0, -35%, 0); } }
+
+@supports (animation-timeline: scroll()) {
+  .film-css .film-col {
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+  }
+  .film-css .film-col-0 { animation-name: film-col-0; }
+  .film-css .film-col-1 { animation-name: film-col-1; }
+  .film-css .film-col-2 { animation-name: film-col-2; }
+  .film-css .film-col-3 { animation-name: film-col-3; }
+  .film-css .film-col-4 { animation-name: film-col-4; }
 }
