@@ -1,13 +1,28 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FilmCard, FilmOverlays, getColumnPhotos } from './FilmstripShared';
+import './filmstrip-ios.css';
 
 /**
  * iPhone / iPad (Safari, Chrome-on-iOS) version.
  * Also used as the fallback for any browser without CSS scroll-driven animations.
  *
- * Scroll logic: ONE requestAnimationFrame that only writes transform: translate3d().
+ * Two modes, chosen once on load:
+ *  1. CSS scroll-driven animation (Safari 26+): runs on the compositor, in sync with native
+ *     scrolling. This is the default whenever the browser supports it.
+ *  2. JS fallback (older iOS): ONE requestAnimationFrame that only writes translate3d().
+ *
+ * Test switch: add ?film=js to the URL to force the JS mode, ?film=css to force the CSS mode.
  * Do not mix this file with the Android one.
  */
+
+const pickCssMode = (): boolean => {
+  const forced = new URLSearchParams(window.location.search).get('film');
+  if (forced === 'js') return false;
+  const supported =
+    typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('animation-timeline: scroll()');
+  if (forced === 'css') return supported;
+  return supported;
+};
 
 // Scroll range of every column, as a fraction of the column's own height.
 // [value at scroll start, value at scroll end]. Opposite signs = opposite directions.
@@ -22,14 +37,20 @@ const COLUMN_RANGES: Array<[number, number]> = [
 interface ColumnProps {
   columnId: number;
   offset: number;
+  cssMode: boolean;
   setRef: (el: HTMLDivElement | null) => void;
 }
 
-const Column: React.FC<ColumnProps> = ({ columnId, offset, setRef }) => (
+const Column: React.FC<ColumnProps> = ({ columnId, offset, cssMode, setRef }) => (
   <div
     ref={setRef}
-    style={{ willChange: 'transform', transform: 'translate3d(0,0,0)', backfaceVisibility: 'hidden' }}
-    className="flex flex-col gap-4 sm:gap-6 shrink-0 w-44 sm:w-56 md:w-64"
+    // In CSS mode the animation owns "transform"; in JS mode we start from translate3d(0,0,0).
+    style={
+      cssMode
+        ? { willChange: 'transform', backfaceVisibility: 'hidden' }
+        : { willChange: 'transform', transform: 'translate3d(0,0,0)', backfaceVisibility: 'hidden' }
+    }
+    className={`film-ios-col film-ios-col-${columnId} flex flex-col gap-4 sm:gap-6 shrink-0 w-44 sm:w-56 md:w-64`}
   >
     {getColumnPhotos(offset).map((url, idx) => (
       <FilmCard key={`col-${columnId}-item-${idx}`} url={url} idx={idx} columnId={columnId} />
@@ -39,8 +60,11 @@ const Column: React.FC<ColumnProps> = ({ columnId, offset, setRef }) => (
 
 export const FilmstripIOS: React.FC = () => {
   const columnRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [cssMode] = useState<boolean>(pickCssMode);
 
   useEffect(() => {
+    if (cssMode) return; // CSS handles the motion, no JS needed
+
     let rafId = 0;
     let maxScroll = 1;
     let columnHeights: number[] = [];
@@ -99,21 +123,21 @@ export const FilmstripIOS: React.FC = () => {
       window.removeEventListener('orientationchange', onResize);
       ro.disconnect();
     };
-  }, []);
+  }, [cssMode]);
 
   return (
     <div
       aria-hidden="true"
-      className="fixed top-0 left-0 w-full h-lvh pointer-events-none overflow-hidden z-0 select-none"
+      className={`${cssMode ? 'film-ios-css ' : ''}fixed top-0 left-0 w-full h-lvh pointer-events-none overflow-hidden z-0 select-none`}
       style={{ contain: 'strict' }}
     >
       <div className="absolute -inset-x-32 -inset-y-48 flex justify-center items-start gap-4 sm:gap-6 md:gap-8 transform -rotate-[13deg] origin-center">
-        <Column columnId={0} offset={0} setRef={(el) => (columnRefs.current[0] = el)} />
-        <Column columnId={1} offset={2} setRef={(el) => (columnRefs.current[1] = el)} />
-        <Column columnId={2} offset={4} setRef={(el) => (columnRefs.current[2] = el)} />
-        <Column columnId={3} offset={1} setRef={(el) => (columnRefs.current[3] = el)} />
+        <Column columnId={0} offset={0} cssMode={cssMode} setRef={(el) => (columnRefs.current[0] = el)} />
+        <Column columnId={1} offset={2} cssMode={cssMode} setRef={(el) => (columnRefs.current[1] = el)} />
+        <Column columnId={2} offset={4} cssMode={cssMode} setRef={(el) => (columnRefs.current[2] = el)} />
+        <Column columnId={3} offset={1} cssMode={cssMode} setRef={(el) => (columnRefs.current[3] = el)} />
         <div className="hidden lg:block">
-          <Column columnId={4} offset={3} setRef={(el) => (columnRefs.current[4] = el)} />
+          <Column columnId={4} offset={3} cssMode={cssMode} setRef={(el) => (columnRefs.current[4] = el)} />
         </div>
       </div>
       <FilmOverlays />
